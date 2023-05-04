@@ -5,6 +5,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 main_menu = ['Просмотр накоплений', 'Редактирование накоплений']
 
 class UserState(StatesGroup):
+    start = State()
     waiting_decision = State()
     watch_capital = State()
     editing = State()
@@ -26,5 +27,12 @@ async def decision_make(message: types.Message, state: FSMContext):
     await state.update_data(chosen_decision=message.text.lower())
     if message.text.lower() == 'Просмотр накоплений':
         print('Просмотр накоплений')
+        await state.set_state(UserState.watch_capital.state)
     if message.text.lower() == 'Редактирование накоплений':
         print('Редактирование накоплений')
+        await state.set_state(UserState.editing.state)
+
+def register_handlers(dp: Dispatcher):
+    dp.register_message_handler(user_start, commands="start", state="*")
+    dp.register_message_handler(decision_make, state=UserState.waiting_decision)
+    dp.register_message_handler()
