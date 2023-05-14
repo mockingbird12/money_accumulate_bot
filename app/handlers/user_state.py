@@ -9,7 +9,7 @@ class UserState(StatesGroup):
     waiting_decision = State()
     watch_capital = State()
     editing = State()
-    editing_exsistent_capital = State()
+    editing_current_capital = State()
     create_new_capital = State()
 
 async def user_start(message: types.Message, state: FSMContext):
