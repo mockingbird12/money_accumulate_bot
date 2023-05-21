@@ -9,6 +9,8 @@ from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from handlers.user_state import UserState
 
 import keyboards
+
+from db_engine import DB_driver
 from service_lib import get_all_savings
 import config
 from os import getenv
@@ -23,7 +25,6 @@ dp = Dispatcher(bot, storage=MemoryStorage())
 logging.basicConfig(level=logging.INFO)
 
 
-
 @dp.message_handler(commands=["start"])
 async def start_conversation(message: types.Message):
     keyboard = keyboards.start()
@@ -31,11 +32,18 @@ async def start_conversation(message: types.Message):
 
 
 @dp.message_handler(Text(equals=config.WATCH))
-async def cmd_list(message: types.Message, state: FSMContext):
+async def cmd_list(message: types.Message):
     print('Просмотр')
     await message.answer("Просмотр")
-    for one_saving in get_all_savings():
-        await message.answer(one_saving)
+    db = DB_driver()
+    total_capital = 0
+    for one_saving in db.get_savings():
+        print(one_saving)
+        value = db.get_saving_value(one_saving.name)
+        print(f'value {value}')
+        total_capital += value
+        await message.answer(f"{one_saving} - {value}")
+    await message.answer(f"Общая сумма накоплений - {total_capital}")
     # await state.set_state(UserState.watch_capital.state)
 
 
@@ -43,8 +51,27 @@ async def cmd_list(message: types.Message, state: FSMContext):
 async def cmd_edit(message: types.Message, state: FSMContext):
     print('Редактирование')
     keyboard = keyboards.savings()
-    await message.answer("Редактирование",reply_markup=keyboard)
+    print('keyboard create')
+    await message.answer("Выберите какое накопление вы будете редактировать",reply_markup=keyboard)
     await state.set_state(UserState.editing.state)
+
+
+@dp.message_handler(Text(equals=config.CREATING))
+async def create_capital(message: types.Message, state: FSMContext):
+    keyboard = keyboards.savings()
+    await message.answer("Создание. Введите название накопления", reply_markup=types.ReplyKeyboardRemove())
+    await state.set_state(UserState.create_new_capital.state)
+
+
+@dp.message_handler()
+async def create_current_capital(message: types.Message, state: FSMContext):
+    user_data = message.text.lower()
+    print(user_data)
+    db_client = DB_driver()
+    db_client.create_savings(user_data)
+    keyboard = keyboards.start()
+    await message.answer(f"Отлично накопление <{user_data}> создано", reply_markup=keyboard)
+    await state.finish()
 
 
 @dp.message_handler()
@@ -59,7 +86,11 @@ async def editing_current_capital(message: types.Message, state: FSMContext):
     await message.answer("Вы выбрали:")
     user_data = await state.get_data()
     new_value = message.text
-    await message.answer(f"Накопление {user_data['chosen_capital']} Новая сумма {new_value}")
+    keyboard = keyboards.start()
+    db_client = DB_driver()
+    db_client.set_saving_value(user_data['chosen_capital'],new_value)
+    await message.answer(f"Накопление {user_data['chosen_capital']} Новая сумма {new_value}", reply_markup=keyboard)
+    await state.finish()
 
 
 dp.register_message_handler(editing_capitals, state=UserState.editing)
@@ -67,6 +98,7 @@ dp.register_message_handler(cmd_list)
 dp.register_message_handler(cmd_edit)
 dp.register_message_handler(start_conversation, commands="start")
 dp.register_message_handler(editing_current_capital, state=UserState.editing_current_capital)
+dp.register_message_handler(create_current_capital, state=UserState.create_new_capital)
 
 
 if __name__ == "__main__":
