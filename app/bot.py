@@ -58,9 +58,25 @@ async def cmd_edit(message: types.Message, state: FSMContext):
 
 @dp.message_handler(Text(equals=config.CREATING))
 async def create_capital(message: types.Message, state: FSMContext):
-    keyboard = keyboards.savings()
     await message.answer("Создание. Введите название накопления", reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(UserState.create_new_capital.state)
+
+
+@dp.message_handler(Text(equals=config.DELETE))
+async def delete_capital(message: types.Message, state: FSMContext):
+    delete_keyboard = keyboards.savings()
+    await message.answer("Выберите что удалить:", reply_markup=delete_keyboard)
+    await state.set_state(UserState.delete.state)
+
+
+@dp.message_handler()
+async def delete_current_capital(message: types.Message, state: FSMContext):
+    user_data = message.text.lower()
+    print(user_data)
+    db_client = DB_driver()
+    db_client.delete_saving(user_data)
+    await message.answer(f"Накопление {user_data} успешно удалено")
+    await state.finish()
 
 
 @dp.message_handler()
@@ -99,6 +115,7 @@ dp.register_message_handler(cmd_edit)
 dp.register_message_handler(start_conversation, commands="start")
 dp.register_message_handler(editing_current_capital, state=UserState.editing_current_capital)
 dp.register_message_handler(create_current_capital, state=UserState.create_new_capital)
+dp.register_message_handler(delete_current_capital, state=UserState.delete)
 
 
 if __name__ == "__main__":

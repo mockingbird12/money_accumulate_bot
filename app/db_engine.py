@@ -70,6 +70,12 @@ class DB_driver():
     def get_savings_value(self)->[]:
         return self.session.query(SavingValue).all()
 
+    def delete_saving(self, saving_name:str)->True:
+        delete_item = self.session.query(Saving).filter(Saving.name==saving_name).one()
+        self.session.delete(delete_item)
+        self.session.commit()
+        return True
+
 
 if __name__ == '__main__':
     db_test = DB_driver()

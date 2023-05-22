@@ -6,6 +6,7 @@ main_menu = ['Просмотр накоплений', 'Редактирован�
 
 class UserState(StatesGroup):
     start = State()
+    delete = State()
     waiting_decision = State()
     watch_capital = State()
     editing = State()

@@ -8,6 +8,7 @@ def start():
             types.KeyboardButton(text=config.WATCH),
             types.KeyboardButton(text=config.EDITING),
             types.KeyboardButton(text=config.CREATING),
+            types.KeyboardButton(text=config.DELETE),
         ],
     ]
     keyboard = types.ReplyKeyboardMarkup(
