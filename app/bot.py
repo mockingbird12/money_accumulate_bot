@@ -37,12 +37,12 @@ async def cmd_list(message: types.Message):
     await message.answer("Просмотр")
     db = DB_driver()
     total_capital = 0
-    for one_saving in db.get_savings():
-        print(one_saving)
-        value = db.get_saving_value(one_saving.name)
+    for one_assert in db.get_asserts():
+        print(one_assert)
+        value = db.get_assert_value(one_assert.name)
         print(f'value {value}')
         total_capital += value
-        await message.answer(f"{one_saving} - {value}")
+        await message.answer(f"{one_assert} - {value}")
     await message.answer(f"Общая сумма накоплений - {total_capital}")
     # await state.set_state(UserState.watch_capital.state)
 
@@ -57,41 +57,41 @@ async def cmd_edit(message: types.Message, state: FSMContext):
 
 
 @dp.message_handler(Text(equals=config.CREATING))
-async def create_capital(message: types.Message, state: FSMContext):
+async def create_assert(message: types.Message, state: FSMContext):
     await message.answer("Создание. Введите название накопления", reply_markup=types.ReplyKeyboardRemove())
     await state.set_state(UserState.create_new_capital.state)
 
 
 @dp.message_handler(Text(equals=config.DELETE))
-async def delete_capital(message: types.Message, state: FSMContext):
+async def delete_assert(message: types.Message, state: FSMContext):
     delete_keyboard = keyboards.savings()
     await message.answer("Выберите что удалить:", reply_markup=delete_keyboard)
     await state.set_state(UserState.delete.state)
 
 
 @dp.message_handler()
-async def delete_current_capital(message: types.Message, state: FSMContext):
+async def delete_current_assert(message: types.Message, state: FSMContext):
     user_data = message.text.lower()
     print(user_data)
     db_client = DB_driver()
-    db_client.delete_saving(user_data)
+    db_client.delete_assert(user_data)
     await message.answer(f"Накопление {user_data} успешно удалено")
     await state.finish()
 
 
 @dp.message_handler()
-async def create_current_capital(message: types.Message, state: FSMContext):
+async def create_current_assert(message: types.Message, state: FSMContext):
     user_data = message.text.lower()
     print(user_data)
     db_client = DB_driver()
-    db_client.create_savings(user_data)
+    db_client.create_assert(user_data)
     keyboard = keyboards.start()
     await message.answer(f"Отлично накопление <{user_data}> создано", reply_markup=keyboard)
     await state.finish()
 
 
 @dp.message_handler()
-async def editing_capitals(message: types.Message, state: FSMContext):
+async def editing_assert(message: types.Message, state: FSMContext):
     await message.answer(f"Введите новую сумму {message.text}", reply_markup=types.ReplyKeyboardRemove())
     await state.update_data(chosen_capital=message.text.lower())
     await state.set_state(UserState.editing_current_capital.state)
@@ -104,18 +104,18 @@ async def editing_current_capital(message: types.Message, state: FSMContext):
     new_value = message.text
     keyboard = keyboards.start()
     db_client = DB_driver()
-    db_client.set_saving_value(user_data['chosen_capital'],new_value)
+    db_client.set_assert_value(user_data['chosen_capital'],new_value)
     await message.answer(f"Накопление {user_data['chosen_capital']} Новая сумма {new_value}", reply_markup=keyboard)
     await state.finish()
 
 
-dp.register_message_handler(editing_capitals, state=UserState.editing)
+dp.register_message_handler(editing_assert, state=UserState.editing)
 dp.register_message_handler(cmd_list)
 dp.register_message_handler(cmd_edit)
 dp.register_message_handler(start_conversation, commands="start")
 dp.register_message_handler(editing_current_capital, state=UserState.editing_current_capital)
-dp.register_message_handler(create_current_capital, state=UserState.create_new_capital)
-dp.register_message_handler(delete_current_capital, state=UserState.delete)
+dp.register_message_handler(create_current_assert, state=UserState.create_new_capital)
+dp.register_message_handler(delete_current_assert, state=UserState.delete)
 
 
 if __name__ == "__main__":

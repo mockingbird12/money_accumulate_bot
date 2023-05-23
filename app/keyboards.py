@@ -22,7 +22,7 @@ def savings():
     kb = []
     buttons = []
     db = DB_driver()
-    for i in db.get_savings():
+    for i in db.get_asserts():
         buttons.append(types.KeyboardButton(text=i.name))
     kb.append(buttons)
     keyboard = types.ReplyKeyboardMarkup(
