@@ -9,6 +9,7 @@ class UserState(StatesGroup):
     delete = State()
     waiting_decision = State()
     watch_capital = State()
+    select_assert_currency = State()
     editing = State()
     editing_current_capital = State()
     create_new_capital = State()

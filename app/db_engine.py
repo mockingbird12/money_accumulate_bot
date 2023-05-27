@@ -60,8 +60,14 @@ class DB_driver():
     def __init__(self):
         self.session = Session(engine)
 
-    def create_assert(self, name:str):
-        saving = Assert(name=name)
+    def create_assert(self, name:str, assert_value:str=None, currency_id:int=None):
+        if currency_id:
+            if assert_value:
+                saving = Assert(name=name, assert_value=assert_value, currency_id=currency_id)
+            else:
+                saving = Assert(name=name, currency_id=currency_id)
+        else:
+            saving = Assert(name=name)
         self.session.add(saving)
         self.session.commit()
 
@@ -116,16 +122,17 @@ class DB_driver():
 
 if __name__ == '__main__':
     db_test = DB_driver()
-    db_test.create_currency('USD')
-    db_test.create_currency('RUB')
-    db_test.create_assert('Cash')
-    db_test.create_assert('Portfolio')
-    db_test.set_assert_currency('Cash','USD')
-    db_test.set_assert_currency('Portfolio', 'RUB')
-    db_test.set_assert_value('Cash', 1000)
-    db_test.set_assert_value('Portfolio', 2345)
+    # db_test.create_currency('USD')
+    # db_test.create_currency('RUB')
+    db_test.create_assert('Доллары кеш')
+    # db_test.create_assert('Portfolio')
+    # db_test.set_assert_currency('Cash','USD')
+    # db_test.set_assert_currency('Portfolio', 'RUB')
+    # db_test.set_assert_value('Cash', 1000)
+    # db_test.set_assert_value('Portfolio', 2345)
     for i in db_test.get_currency():
         print(i.name)
+    print(db_test.get_currency(currency_name='USD'))
     # set_saving_value('Наличные', 1000)
     # print(get_savings('Jetlend'))
     for assert_unit in db_test.get_asserts():

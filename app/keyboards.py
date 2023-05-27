@@ -18,6 +18,19 @@ def start():
     )
     return keyboard
 
+def currency():
+    kb = []
+    buttons = []
+    db = DB_driver()
+    for i in db.get_currency():
+        buttons.append(types.KeyboardButton(text=i.name))
+    kb.append(buttons)
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb,
+        resize_keyboard=True
+    )
+    return keyboard
+
 def savings():
     kb = []
     buttons = []
@@ -27,7 +40,6 @@ def savings():
     kb.append(buttons)
     keyboard = types.ReplyKeyboardMarkup(
         keyboard=kb,
-        resize_keyboard=True,
-        input_field_placeholder="Выберите что делать"
+        resize_keyboard=True
     )
     return keyboard
