@@ -37,13 +37,22 @@ async def cmd_list(message: types.Message):
     await message.answer("Просмотр")
     db = DB_driver()
     total_capital = 0
+    total_capital_dict = {}
     for one_assert in db.get_asserts():
         print(one_assert)
+        currency = db.get_assert_currency(one_assert)
+        if currency.name not in total_capital_dict.keys():
+            total_capital_dict[currency.name] = 0
         value = db.get_assert_value(one_assert.name)
-        print(f'value {value}')
+        res = total_capital_dict.get(currency.name)
+        new_value = res + value
+        total_capital_dict[currency.name] = new_value
         total_capital += value
-        await message.answer(f"{one_assert} - {value}")
-    await message.answer(f"Общая сумма накоплений - {total_capital}")
+        await message.answer(f"{one_assert} - {value} - {currency.name}")
+        print(total_capital_dict)
+    await message.answer(f"Общая сумма накоплений")
+    for one_assert in total_capital_dict:
+        await message.answer(f"{one_assert} {total_capital_dict[one_assert]}")
     # await state.set_state(UserState.watch_capital.state)
 
 

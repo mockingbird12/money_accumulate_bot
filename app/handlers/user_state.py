@@ -14,6 +14,7 @@ class UserState(StatesGroup):
     editing_current_capital = State()
     create_new_capital = State()
 
+
 async def user_start(message: types.Message, state: FSMContext):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     for name in main_menu:
