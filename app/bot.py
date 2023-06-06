@@ -50,7 +50,7 @@ async def cmd_list(message: types.Message):
         total_capital += value
         await message.answer(f"{one_assert} - {value} - {currency.name}")
         print(total_capital_dict)
-    await message.answer(f"Общая сумма накоплений")
+    await message.answer(f"Общая сумма накоплений", reply_markup=keyboards.start())
     for one_assert in total_capital_dict:
         await message.answer(f"{one_assert} {total_capital_dict[one_assert]}")
     # await state.set_state(UserState.watch_capital.state)
@@ -78,13 +78,19 @@ async def delete_assert(message: types.Message, state: FSMContext):
     await state.set_state(UserState.delete.state)
 
 
+@dp.message_handler(Text(equals=config.CANCEL))
+async def cancel_action(message:types.Message, state: FSMContext):
+    await message.answer(config.CANCEL, reply_markup=keyboards.start())
+    await state.finish()
+
+
 @dp.message_handler()
 async def delete_current_assert(message: types.Message, state: FSMContext):
     user_data = message.text.lower()
     print(user_data)
     db_client = DB_driver()
     db_client.delete_assert(user_data)
-    await message.answer(f"Накопление {user_data} успешно удалено")
+    await message.answer(f"Накопление {user_data} успешно удалено", reply_markup=keyboards.start())
     await state.finish()
 
 
@@ -116,7 +122,7 @@ async def select_assert_currency(message: types.Message, state: FSMContext):
 
 @dp.message_handler()
 async def editing_assert(message: types.Message, state: FSMContext):
-    await message.answer(f"Введите новую сумму {message.text}", reply_markup=types.ReplyKeyboardRemove())
+    await message.answer(f"Введите новую сумму {message.text}", reply_markup=keyboards.cancel())
     await state.update_data(chosen_capital=message.text.lower())
     await state.set_state(UserState.editing_current_capital.state)
 
@@ -137,6 +143,7 @@ dp.register_message_handler(editing_assert, state=UserState.editing)
 dp.register_message_handler(cmd_list)
 dp.register_message_handler(cmd_edit)
 dp.register_message_handler(start_conversation, commands="start")
+# dp.register_message_handler(cancel_action, state=*)
 dp.register_message_handler(editing_current_capital, state=UserState.editing_current_capital)
 dp.register_message_handler(create_current_assert, state=UserState.create_new_capital)
 dp.register_message_handler(delete_current_assert, state=UserState.delete)

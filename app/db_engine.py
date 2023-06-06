@@ -3,9 +3,9 @@ from sqlalchemy import Integer, Column, String, create_engine, ForeignKey, DateT
 from sqlalchemy.orm import relationship
 from sqlalchemy.orm import Session
 from datetime import datetime
+import config
 
-
-engine = create_engine("sqlite:///database.db")
+engine = create_engine(f"sqlite:///{config.DATABASE_PATH}")
 Base = declarative_base()
 
 
@@ -119,12 +119,13 @@ class DB_driver():
         else:
             return self.session.query(Currency).filter(Currency.name == currency_name).one()
 
+db_test = DB_driver()
 
 if __name__ == '__main__':
     db_test = DB_driver()
-    # db_test.create_currency('USD')
-    # db_test.create_currency('RUB')
-    db_test.create_assert('Доллары кеш')
+    db_test.create_currency('USD')
+    db_test.create_currency('RUB')
+    #db_test.create_assert('Доллары кеш')
     # db_test.create_assert('Portfolio')
     # db_test.set_assert_currency('Cash','USD')
     # db_test.set_assert_currency('Portfolio', 'RUB')

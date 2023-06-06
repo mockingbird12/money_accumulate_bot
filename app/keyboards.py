@@ -43,3 +43,12 @@ def savings():
         resize_keyboard=True
     )
     return keyboard
+
+def cancel():
+    kb = []
+    buttons = [config.CANCEL]
+    kb.append(buttons)
+    keyboard = types.ReplyKeyboardMarkup(
+        keyboard=kb
+    )
+    return keyboard
