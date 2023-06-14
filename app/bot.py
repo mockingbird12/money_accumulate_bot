@@ -96,10 +96,7 @@ async def delete_current_assert(message: types.Message, state: FSMContext):
 
 @dp.message_handler()
 async def create_current_assert(message: types.Message, state: FSMContext):
-    # Пользователь может ввести данные вручную, не используя кнопки
     await state.update_data(chosen_capital=message.text.lower())
-    # db_client = DB_driver()
-    # db_client.create_assert(user_data['chosen_capital'])
     keyboard = keyboards.currency()
     await message.answer(f"Отлично, выберите валюту актива", reply_markup=keyboard)
     await state.set_state(UserState.select_assert_currency.state)
@@ -108,16 +105,20 @@ async def create_current_assert(message: types.Message, state: FSMContext):
 @dp.message_handler()
 async def select_assert_currency(message: types.Message, state: FSMContext):
     currency_str = message.text
-    # Пользователь может ввести данные вручную, не используя кнопки
     user_data = await state.get_data()
     assert_name = user_data['chosen_capital']
-    print(currency_str, assert_name)
     db_client = DB_driver()
-    currency_id = db_client.get_currency(currency_name=currency_str)
-    db_client.create_assert(name=assert_name, currency_id=currency_id.id)
-    keyboard = keyboards.start()
-    await message.answer(f"Актив {assert_name} с валютой {currency_str} создан", reply_markup=keyboard)
-    await state.finish()
+    print(currency_str)
+    print([i.name for i in db_client.get_currency()])
+    if currency_str in [i.name for i in db_client.get_currency()]:
+        print(currency_str, assert_name)
+        currency_id = db_client.get_currency(currency_name=currency_str)
+        db_client.create_assert(name=assert_name, currency_id=currency_id.id)
+        keyboard = keyboards.start()
+        await message.answer(f"Актив {assert_name} с валютой {currency_str} создан", reply_markup=keyboard)
+        await state.finish()
+    else:
+        await message.answer(f"Вы ввели недоступную валюту.\nВыберите валюту из кнопок")
 
 
 @dp.message_handler()
@@ -129,14 +130,17 @@ async def editing_assert(message: types.Message, state: FSMContext):
 
 @dp.message_handler()
 async def editing_current_capital(message: types.Message, state: FSMContext):
-    await message.answer("Вы выбрали:")
     user_data = await state.get_data()
     new_value = message.text
-    keyboard = keyboards.start()
-    db_client = DB_driver()
-    db_client.set_assert_value(user_data['chosen_capital'],new_value)
-    await message.answer(f"Накопление {user_data['chosen_capital']} Новая сумма {new_value}", reply_markup=keyboard)
-    await state.finish()
+    if new_value.isnumeric():
+        print(new_value)
+        keyboard = keyboards.start()
+        db_client = DB_driver()
+        db_client.set_assert_value(user_data['chosen_capital'],new_value)
+        await message.answer(f"Накопление {user_data['chosen_capital']} Новая сумма {new_value}", reply_markup=keyboard)
+        await state.finish()
+    else:
+        await message.answer(f"Значение должно состоять из цифр\nВведите заново")
 
 
 dp.register_message_handler(editing_assert, state=UserState.editing)

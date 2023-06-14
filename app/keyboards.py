@@ -35,20 +35,20 @@ def savings():
     kb = []
     buttons = []
     db = DB_driver()
-    for i in db.get_asserts():
-        buttons.append(types.KeyboardButton(text=i.name))
-    kb.append(buttons)
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb,
         resize_keyboard=True
     )
+    for i in db.get_asserts():
+        keyboard.add(types.KeyboardButton(text=i.name))
     return keyboard
+
 
 def cancel():
     kb = []
     buttons = [config.CANCEL]
     kb.append(buttons)
     keyboard = types.ReplyKeyboardMarkup(
-        keyboard=kb
+        keyboard=kb,
+        resize_keyboard=True
     )
     return keyboard
